@@ -42,13 +42,29 @@ See `kaggle_notebook_cells.py` — clones this repo, installs dependencies,
 runs both experiments against real CWRU `.mat` files, and auto-commits the
 resulting logs back to GitHub.
 
-To switch from synthetic to real data:
+**You do not need to edit any file paths or config flags.** Both scripts
+call `discover_dataset.discover_cwru_dataset()` automatically at the start
+of every run, which:
 
-1. In both `CONFIG["dataset"]`, set `"use_synthetic_data": False`
-2. Set `normal_file_path` and `fault_file_path` to your attached CWRU `.mat` files
-3. In `run_chronos_experiment.py`, this automatically switches from
-   `StubForecaster` to the real `ChronosForecaster` (requires
-   `pip install chronos-forecasting torch` and a GPU)
+1. Scans `/kaggle/input` recursively for `.mat` files
+2. Classifies each as a "normal" baseline file or a "fault" file (and which
+   fault type/size) based on CWRU's standard naming conventions
+3. Prints exactly what it found and which files it picked
+4. If a valid normal+fault pair is found, automatically overrides
+   `use_synthetic_data` to `False` and wires in the real file paths
+5. If nothing is found (e.g. no dataset attached yet), it falls back to
+   synthetic mode and tells you clearly why
+
+So on Kaggle: just attach any CWRU dataset via **Add Data**, run the script,
+and check the printed `[discover_dataset]` / `[resolve_dataset_config]` lines
+to confirm it found and used the right files. If it picks the wrong fault
+type/size (e.g. no exact match for your preferred config), it tells you
+exactly what it substituted and why — nothing is silently guessed.
+
+In `run_chronos_experiment.py`, real-data mode also automatically switches
+from `StubForecaster` to the real `ChronosForecaster` (requires
+`pip install chronos-forecasting torch` and a GPU — both are in
+`requirements.txt` and installed by the Kaggle notebook cells).
 
 ## Getting CWRU data
 

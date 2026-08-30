@@ -28,6 +28,10 @@ repo_url = f"https://{GITHUB_TOKEN}@github.com/{GITHUB_USERNAME}/{REPO_NAME}.git
 # ============================================================
 # CELL 3 — Run experiments
 # ============================================================
+# No path editing needed — both scripts auto-detect any CWRU dataset
+# attached via Kaggle's "Add Data" panel (scans /kaggle/input, classifies
+# normal vs. fault files by filename, and prints exactly what it found).
+# If nothing is attached yet, they fall back to synthetic data automatically.
 %cd src
 !python run_experiment.py
 !python run_chronos_experiment.py
