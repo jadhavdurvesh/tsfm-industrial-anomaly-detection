@@ -48,7 +48,7 @@ CONFIG = {
     },
 
     "preprocessing": {
-        "window_size": 2048,
+        "window_size": 1600,
         "stride": 512,
         "normalization": "z-score",
         "filter": "none",
