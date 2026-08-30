@@ -160,11 +160,19 @@ class ChronosForecaster:
     def predict(self, context: np.ndarray, prediction_length: int, num_samples: int = 20) -> np.ndarray:
         import torch
         context_tensor = torch.tensor(context, dtype=torch.float32).unsqueeze(0)
-        forecast = self.pipeline.predict(
-            context=context_tensor,
-            prediction_length=prediction_length,
-            num_samples=num_samples,
-        )
+        try:
+            forecast = self.pipeline.predict(
+                context_tensor,  # positional — avoids relying on the exact param name
+                prediction_length=prediction_length,
+                num_samples=num_samples,
+            )
+        except TypeError as e:
+            # Fallback for versions where the keyword is named "inputs" instead of "context"
+            forecast = self.pipeline.predict(
+                inputs=context_tensor,
+                prediction_length=prediction_length,
+                num_samples=num_samples,
+            )
         # forecast shape: [num_series, num_samples, prediction_length] -> take median across samples
         median_forecast = np.median(forecast[0].numpy(), axis=0)
         return median_forecast
