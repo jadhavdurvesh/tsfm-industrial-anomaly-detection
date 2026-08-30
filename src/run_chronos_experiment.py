@@ -59,7 +59,7 @@ CONFIG = {
         "name": "chronos-t5-small",
         "mode": "zero-shot",
         "context_length": 1536,          # first N points of each window fed as context
-        "prediction_length": 512,        # remaining points forecast and compared to actual
+        "prediction_length": 64,        # remaining points forecast and compared to actual
         "num_samples": 20,
         "anomaly_score_method": "forecast_mae",
         "device": "cuda",                # cuda | cpu
