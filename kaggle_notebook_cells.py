@@ -6,7 +6,7 @@ from kaggle_secrets import UserSecretsClient
 secrets = UserSecretsClient()
 GITHUB_TOKEN = secrets.get_secret("GITHUB_TOKEN")
 
-GITHUB_USERNAME = "your-username"                     # <-- change this
+GITHUB_USERNAME = "jadhavdurvesh"                    
 REPO_NAME = "tsfm-industrial-anomaly-detection"        # <-- change this if you named it differently
 
 repo_url = f"https://{GITHUB_TOKEN}@github.com/{GITHUB_USERNAME}/{REPO_NAME}.git"
