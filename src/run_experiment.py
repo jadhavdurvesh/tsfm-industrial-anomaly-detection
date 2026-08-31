@@ -129,7 +129,7 @@ def run_isolation_forest_baseline(config: dict):
     config = dict(config)
     config["dataset"] = resolve_dataset_config(config["dataset"])
 
-    logger = ExperimentLogger(run_name=config["run_name"])
+    logger = ExperimentLogger(run_name=config["run_name"], log_dir=config.get("log_dir", "logs"))
     logger.log_seed(config["seed"])
     logger.log_config(config["dataset"])
     logger.log_config({"preprocessing": config["preprocessing"]})

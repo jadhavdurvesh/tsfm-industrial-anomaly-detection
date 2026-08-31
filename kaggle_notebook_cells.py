@@ -26,15 +26,19 @@ repo_url = f"https://{GITHUB_TOKEN}@github.com/{GITHUB_USERNAME}/{REPO_NAME}.git
 
 
 # ============================================================
-# CELL 3 — Run experiments
+# CELL 3 — Run ALL experiments (every fault type x every model variant)
 # ============================================================
-# No path editing needed — both scripts auto-detect any CWRU dataset
-# attached via Kaggle's "Add Data" panel (scans /kaggle/input, classifies
-# normal vs. fault files by filename, and prints exactly what it found).
-# If nothing is attached yet, they fall back to synthetic data automatically.
+# This single script runs, for EVERY fault type discovered in your attached
+# dataset (inner race, outer race, ball):
+#   - IsolationForest              -> logs/isolationforest/
+#   - Chronos zero-shot ("frozen") -> logs/chronos_zero_shot/
+#   - Chronos fine-tuned           -> logs/chronos_fine_tuned/
+# No path editing needed — auto-detects the dataset attached via Kaggle's
+# "Add Data" panel. Prints a full comparison table at the end and saves a
+# summary JSON. This is the ONE script you need — no separate runs required
+# for a zero-shot vs. fine-tuned comparison, it's already all in one pass.
 %cd src
-!python run_experiment.py
-!python run_chronos_experiment.py
+!python run_all_fault_types.py
 %cd ..
 
 

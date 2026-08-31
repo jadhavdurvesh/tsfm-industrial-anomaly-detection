@@ -177,6 +177,69 @@ class ChronosForecaster:
         median_forecast = np.median(forecast[0].numpy(), axis=0)
         return median_forecast
 
+    def finetune(self, windows_train: np.ndarray, context_length: int, prediction_length: int,
+                 learning_rate: float, epochs: int, batch_size: int):
+        """
+        Fine-tunes the underlying seq2seq model on windows_train, following the
+        pattern from Amazon's own chronos-forecasting fine-tuning reference
+        (tokenize with the pipeline's own tokenizer, train with cross-entropy).
+
+        NOTE: chronos-forecasting's public API for tokenizer/model internals has
+        changed across versions (we already hit this once with .predict()'s
+        argument name). If this raises an AttributeError/TypeError, the fix is
+        almost always renaming one of the tokenizer/model calls below to match
+        whatever chronos-forecasting version Kaggle installs — check
+        `dir(self.pipeline.tokenizer)` and `dir(self.pipeline.model)` to find
+        the current method names.
+        """
+        import torch
+        from torch.optim import AdamW
+
+        model = self.pipeline.model.model  # underlying HF seq2seq model (e.g. T5)
+        tokenizer = self.pipeline.tokenizer
+        device = next(model.parameters()).device
+
+        optimizer = AdamW(model.parameters(), lr=learning_rate)
+        model.train()
+
+        n_windows = len(windows_train)
+        print(f"[ChronosForecaster.finetune] Fine-tuning on {n_windows} windows, "
+              f"{epochs} epoch(s), batch_size={batch_size}, lr={learning_rate}")
+
+        for epoch in range(epochs):
+            epoch_loss = 0.0
+            n_batches = 0
+            for i in range(0, n_windows, batch_size):
+                batch = windows_train[i:i + batch_size]
+                contexts = [torch.tensor(w[:context_length], dtype=torch.float32) for w in batch]
+                labels = [torch.tensor(w[context_length:context_length + prediction_length], dtype=torch.float32) for w in batch]
+
+                # Tokenize context and label using Chronos's own tokenizer.
+                # context_input_transform / label_input_transform are the method
+                # names used in Amazon's reference fine-tuning code as of the
+                # library version this was written against.
+                input_ids, attention_mask, scale = tokenizer.context_input_transform(torch.stack(contexts))
+                label_ids, label_mask = tokenizer.label_input_transform(torch.stack(labels), scale)
+                label_ids[label_mask == 0] = -100  # ignore padding in loss
+
+                optimizer.zero_grad()
+                output = model(
+                    input_ids=input_ids.to(device),
+                    attention_mask=attention_mask.to(device),
+                    labels=label_ids.to(device),
+                )
+                loss = output.loss
+                loss.backward()
+                optimizer.step()
+
+                epoch_loss += loss.item()
+                n_batches += 1
+
+            print(f"[ChronosForecaster.finetune] Epoch {epoch + 1}/{epochs} — avg loss: {epoch_loss / max(n_batches, 1):.4f}")
+
+        model.eval()
+        print("[ChronosForecaster.finetune] Done.")
+
 
 def load_forecaster(model_cfg: dict, use_synthetic_data: bool):
     if use_synthetic_data:
@@ -217,7 +280,7 @@ def run_chronos_zeroshot(config: dict):
     config = dict(config)
     config["dataset"] = resolve_dataset_config(config["dataset"])
 
-    logger = ExperimentLogger(run_name=config["run_name"])
+    logger = ExperimentLogger(run_name=config["run_name"], log_dir=config.get("log_dir", "logs"))
     logger.log_seed(config["seed"])
     logger.log_config(config["dataset"])
     logger.log_config({"preprocessing": config["preprocessing"]})
@@ -272,6 +335,18 @@ def run_chronos_zeroshot(config: dict):
 
     # 4. Load forecaster (stub if synthetic, real Chronos otherwise)
     forecaster = load_forecaster(config["model"], use_synthetic)
+
+    # 4b. Fine-tune if requested (real Chronos only — StubForecaster has nothing to train)
+    if config["finetuning"]["enabled"] and not use_synthetic:
+        forecaster.finetune(
+            windows_train=windows_train,
+            context_length=context_length,
+            prediction_length=prediction_length,
+            learning_rate=config["finetuning"]["learning_rate"],
+            epochs=config["finetuning"]["epochs"],
+            batch_size=config["finetuning"]["batch_size"],
+        )
+        logger.log_note("Model was fine-tuned on the training split before scoring (see training_params).")
 
     # 5. Compute anomaly scores for train (to calibrate threshold) and test (to evaluate)
     train_scores = compute_anomaly_scores(

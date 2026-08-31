@@ -141,6 +141,59 @@ def discover_cwru_dataset(preferred_fault_type: str = "inner_race",
     }
 
 
+def discover_all_fault_pairs(root: str = None, verbose: bool = True):
+    """
+    Like discover_cwru_dataset(), but returns ONE normal+fault pair PER
+    fault file found, instead of picking just one. Use this when you want to
+    run experiments across every fault type/size present in the attached
+    dataset (e.g. inner race, outer race, ball) rather than just one.
+
+    Returns: list of dicts, each with keys "normal_file_path",
+             "fault_file_path", "fault_type", "fault_size_inch" — one per
+             fault file discovered. Empty list if no usable normal+fault
+             files are found.
+    """
+    if root is None:
+        root = KAGGLE_INPUT_ROOT
+    all_files = find_all_mat_files(root)
+
+    if verbose:
+        print(f"[discover_all_fault_pairs] Scanning {root} ... found {len(all_files)} .mat file(s).")
+
+    if not all_files:
+        if verbose:
+            print(f"[discover_all_fault_pairs] No .mat files found under {root}.")
+        return []
+
+    classified = [c for c in (classify_file(f) for f in all_files) if c is not None]
+    normal_files = [c for c in classified if c["category"] == "normal"]
+    fault_files = [c for c in classified if c["category"] == "fault"]
+
+    if verbose:
+        print(f"[discover_all_fault_pairs] Found {len(normal_files)} normal file(s), "
+              f"{len(fault_files)} fault file(s).")
+
+    if not normal_files or not fault_files:
+        if verbose:
+            print("[discover_all_fault_pairs] Missing a normal file or fault files — cannot build any pair.")
+        return []
+
+    chosen_normal = normal_files[0]
+    pairs = []
+    for fault in fault_files:
+        pairs.append({
+            "normal_file_path": chosen_normal["path"],
+            "fault_file_path": fault["path"],
+            "fault_type": fault["fault_type"],
+            "fault_size_inch": fault["fault_size_inch"],
+        })
+        if verbose:
+            print(f"  PAIR: normal={chosen_normal['path']}  fault={fault['path']} "
+                  f"(type={fault['fault_type']}, size={fault['fault_size_inch']})")
+
+    return pairs
+
+
 if __name__ == "__main__":
     result = discover_cwru_dataset()
     print("\nFinal result:", result)
