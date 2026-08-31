@@ -1,0 +1,80 @@
+{
+  "run_name": "chronos_zeroshot_inner_race_0.007",
+  "timestamp_utc": "2026-08-31T16:01:17.153254+00:00",
+  "environment": {
+    "python_version": "3.12.13 (main, Mar  4 2026, 09:23:07) [GCC 11.4.0]",
+    "platform": "Linux-6.12.90+-x86_64-with-glibc2.35",
+    "processor": "x86_64",
+    "package_versions": {
+      "numpy": "2.0.2",
+      "pandas": "2.3.3",
+      "scikit-learn": "1.6.1",
+      "torch": "2.10.0+cu128",
+      "transformers": "5.0.0",
+      "chronos-forecasting": "2.3.1",
+      "scipy": "1.16.3",
+      "matplotlib": "3.10.0"
+    }
+  },
+  "dataset_config": {
+    "name": "CWRU",
+    "use_synthetic_data": false,
+    "source_url": "https://engineering.case.edu/bearingdatacenter",
+    "fault_type": "inner_race",
+    "fault_size_inch": 0.007,
+    "load_hp": 1,
+    "sampling_rate_hz": 12000,
+    "sensor_position": "DE",
+    "normal_file_path": "/kaggle/input/datasets/durveshmukundjadhav/dataset2/Normal_1.mat",
+    "fault_file_path": "/kaggle/input/datasets/durveshmukundjadhav/dataset2/IR007_1.mat",
+    "preprocessing": {
+      "window_size": 1600,
+      "stride": 512,
+      "normalization": "z-score",
+      "filter": "none",
+      "train_test_split": 0.7
+    },
+    "evaluation": {
+      "metrics": [
+        "f1",
+        "precision",
+        "recall",
+        "detection_delay_samples"
+      ],
+      "point_adjustment": false,
+      "anomaly_threshold_method": "percentile_95"
+    },
+    "split_details": {
+      "n_windows_total": 1181,
+      "n_windows_train": 826,
+      "n_windows_test": 355,
+      "n_anomalous_in_test": 237
+    }
+  },
+  "model_params": {
+    "name": "chronos-t5-small",
+    "mode": "zero-shot",
+    "context_length": 1536,
+    "prediction_length": 64,
+    "num_samples": 20,
+    "anomaly_score_method": "forecast_mae",
+    "device": "cuda",
+    "torch_dtype": "bfloat16"
+  },
+  "training_params": {
+    "enabled": false,
+    "learning_rate": null,
+    "epochs": null,
+    "batch_size": null,
+    "train_fraction_used": null
+  },
+  "seed": 42,
+  "results": {
+    "f1_score": 0.9813664596273292,
+    "precision": 0.9634146341463414,
+    "recall": 1.0,
+    "detection_delay_samples": 0,
+    "point_adjustment_used": false
+  },
+  "notes": "Chronos run \u2014 forecast-MAE zero-shot anomaly scoring. Data source: REAL CWRU + REAL Chronos.\nSignal length: 605894, fault onset index: 483903\nAnomaly threshold (95th percentile of train scores): 0.508413"
+}

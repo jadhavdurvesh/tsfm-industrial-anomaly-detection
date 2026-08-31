@@ -1,0 +1,77 @@
+[
+  {
+    "fault_type": "outer_race",
+    "fault_size_inch": 0.007,
+    "isolationforest": {
+      "f1_score": 0.973305954825462,
+      "precision": 0.948,
+      "recall": 1.0,
+      "detection_delay_samples": 0,
+      "point_adjustment_used": false
+    },
+    "chronos_zero_shot": {
+      "f1_score": 0.9814432989690721,
+      "precision": 0.9635627530364372,
+      "recall": 1.0,
+      "detection_delay_samples": 0,
+      "point_adjustment_used": false
+    },
+    "chronos_fine_tuned": {
+      "f1_score": 0.9855072463768116,
+      "precision": 0.9714285714285714,
+      "recall": 1.0,
+      "detection_delay_samples": 0,
+      "point_adjustment_used": false
+    }
+  },
+  {
+    "fault_type": "ball",
+    "fault_size_inch": 0.007,
+    "isolationforest": {
+      "f1_score": 0.9791666666666666,
+      "precision": 0.9591836734693877,
+      "recall": 1.0,
+      "detection_delay_samples": 0,
+      "point_adjustment_used": false
+    },
+    "chronos_zero_shot": {
+      "f1_score": 0.9728601252609603,
+      "precision": 0.9588477366255144,
+      "recall": 0.9872881355932204,
+      "detection_delay_samples": 0,
+      "point_adjustment_used": false
+    },
+    "chronos_fine_tuned": {
+      "f1_score": 0.9853249475890985,
+      "precision": 0.975103734439834,
+      "recall": 0.9957627118644068,
+      "detection_delay_samples": 0,
+      "point_adjustment_used": false
+    }
+  },
+  {
+    "fault_type": "inner_race",
+    "fault_size_inch": 0.007,
+    "isolationforest": {
+      "f1_score": 0.9731958762886598,
+      "precision": 0.9477911646586346,
+      "recall": 1.0,
+      "detection_delay_samples": 0,
+      "point_adjustment_used": false
+    },
+    "chronos_zero_shot": {
+      "f1_score": 0.9813664596273292,
+      "precision": 0.9634146341463414,
+      "recall": 1.0,
+      "detection_delay_samples": 0,
+      "point_adjustment_used": false
+    },
+    "chronos_fine_tuned": {
+      "f1_score": 0.9875,
+      "precision": 0.9753086419753086,
+      "recall": 1.0,
+      "detection_delay_samples": 0,
+      "point_adjustment_used": false
+    }
+  }
+]
